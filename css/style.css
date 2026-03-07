@@ -123,8 +123,6 @@ h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bott
 }
 .opacity-group { display: flex; align-items: center; gap: 10px; font-size: 12px; }
 .opacity-group input { flex-grow: 1; }
-.order-group { margin-top: 5px; display: flex; gap: 5px; }
-.order-group button { font-size: 10px; padding: 2px 8px; cursor: pointer; flex: 1; }
 
 .gps-icon {
     position: relative;

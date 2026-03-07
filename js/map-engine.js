@@ -2,8 +2,8 @@ import { baseMap, overlays } from './config.js';
 
 class OkayamaMapApp {
     constructor() {
-        // 初期表示を沖新田付近（岡山市中区・東区あたり）に設定
-        this.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([34.6300, 133.9800], 13);
+        // 初期表示を岡山駅付近に設定
+        this.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([34.6664, 133.9186], 13);
         this.activeLayers = {}; // 表示中の Leaflet レイヤーを保持
         this.locationMarker = null;
         this.infoPopup = null;
@@ -43,10 +43,6 @@ class OkayamaMapApp {
                     <span>透過</span>
                     <input type="range" class="opacity" data-id="${data.id}" min="0" max="1" step="0.1" value="${data.defaultOpacity}">
                 </div>
-                <div class="order-group">
-                    <button class="up" data-id="${data.id}">前面へ</button>
-                    <button class="down" data-id="${data.id}">背面へ</button>
-                </div>
             `;
             listContainer.appendChild(item);
 
@@ -54,8 +50,6 @@ class OkayamaMapApp {
             item.querySelector('.toggle').onchange = (e) => this.toggleLayer(e.target.checked, data);
             item.querySelector('.layer-name-button').onclick = () => this.openInfoPopup(data);
             item.querySelector('.opacity').oninput = (e) => this.setOpacity(data.id, e.target.value);
-            item.querySelector('.up').onclick = () => this.moveZ(data.id, 10);
-            item.querySelector('.down').onclick = () => this.moveZ(data.id, -10);
         });
     }
 
@@ -142,13 +136,6 @@ class OkayamaMapApp {
 
     setOpacity(id, val) {
         if (this.activeLayers[id]) this.activeLayers[id].layer.setOpacity(val);
-    }
-
-    moveZ(id, delta) {
-        if (this.activeLayers[id]) {
-            this.activeLayers[id].data.zIndex += delta;
-            this.activeLayers[id].layer.setZIndex(this.activeLayers[id].data.zIndex);
-        }
     }
 
     showLocation() {
