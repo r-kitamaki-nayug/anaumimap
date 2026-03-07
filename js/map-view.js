@@ -1,4 +1,4 @@
-import { baseMap } from './config.js';
+import { baseMap } from './config.js?v=1.0.6';
 
 export class OkayamaMapView {
     constructor({ onMapClick } = {}) {
