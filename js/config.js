@@ -10,10 +10,11 @@ export const baseMap = {
 export const overlays = [
     {
         id: "chisui_bunruizu",
-        name: "治水地形分類図 (地盤の履歴書)",
+        name: "戦国〜平安推定マップ (吉備の穴海)",
         year: "∞",
         url: "https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png",
-        description: "色で地面の成り立ちが分かる地図です。水色は昔の川や湿地、紫色は江戸時代以降に海を陸地にした干拓地を示しています。黄色や橙色は少し高い場所です。",        defaultOpacity: 0.8,
+        description: "国土地理院 (治水地形分類図)。江戸時代以前の岡山を推測するモード。紫色のエリアをすべて『海』、水色の筋を『川』と見なすと、児島が島だった頃の『吉備の穴海』の姿が見えてきます。",
+        defaultOpacity: 0.8,
         zIndex: 140
     },
     {
