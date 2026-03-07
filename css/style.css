@@ -103,12 +103,24 @@ h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bott
     border: none;
     background: none;
     color: #1f4fa3;
-    font-weight: bold;
-    font-size: 14px;
     text-align: left;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
 }
 .layer-name-button:hover { text-decoration: underline; }
+.layer-year {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.2;
+}
+.layer-name {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.3;
+}
 .opacity-group { display: flex; align-items: center; gap: 10px; font-size: 12px; }
 .opacity-group input { flex-grow: 1; }
 .order-group { margin-top: 5px; display: flex; gap: 5px; }

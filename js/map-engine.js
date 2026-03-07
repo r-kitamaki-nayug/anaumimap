@@ -34,7 +34,10 @@ class OkayamaMapApp {
             item.innerHTML = `
                 <div class="layer-header">
                     <label class="layer-toggle-label"><input type="checkbox" class="toggle" data-id="${data.id}"></label>
-                    <button type="button" class="layer-name-button" data-id="${data.id}">${data.name}</button>
+                    <button type="button" class="layer-name-button" data-id="${data.id}">
+                        <span class="layer-year">${data.year ?? ''}</span>
+                        <span class="layer-name">${data.name}</span>
+                    </button>
                 </div>
                 <div class="opacity-group">
                     <span>透過</span>
@@ -79,7 +82,7 @@ class OkayamaMapApp {
     }
 
     openInfoPopup(data) {
-        const description = data.attribution || '説明はありません。';
+        const description = data.description || data.attribution || '説明はありません。';
         this.infoPopupTitle.textContent = data.name;
         this.infoPopupBody.textContent = description;
         this.infoPopup.classList.remove('hidden');

@@ -10,12 +10,22 @@ export const baseMap = {
 export const overlays = [
     {
         id: "meiji_swale",
-        name: "明治期の海岸線(低湿地図。1880s-1910s)",
+        name: "明治期の海岸線",
+        year: 1880,
         url: "https://cyberjapandata.gsi.go.jp/xyz/swale/{z}/{x}/{y}.png",
         attribution: "明治13年（1880年）〜明治45年（1912年）にかけて測量された「迅速測図」などの古い地形図を基に、当時の湿地、葦原、水域などを可視化したデータです。 昭和以降の大規模な埋め立てが行われる前の「自然に近い海岸線」や、標高が低く水が溜まりやすかった場所を知る手がかりとなります。",
         defaultOpacity: 0.5,
         zIndex: 50
     },
+    {
+        id: "1970_aerial",
+        name: "航空写真",
+        year: 1974,
+        url: "https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg",
+        description: "国土地理院┃高度経済成長期の岡山。児島湾の締切堤防が完成し、現在の南区の形がほぼ定まった時期の姿です。",
+        defaultOpacity: 0.8,
+        zIndex: 140
+    }
 
     // ここに新しいMapWarperのデータを追加していくだけで、UIに自動反映されます
 ];
