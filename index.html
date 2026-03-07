@@ -3,26 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>岡山-海岸線探訪MAP</title>
+    <title>岡山-昔MAP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
     <div id="map"></div>
 
+    <header id="app-header">
+        <h1>📍重ねて見れる岡山の昔MAP</h1>
+        <!-- <p>岡山のいろいろな年代の地図を重ねて見れます。</p> -->
+    </header>
+
     <div id="controls">
-        <button id="layer-toggle-button" type="button" aria-label="地図レイヤーを開く" aria-expanded="false" aria-controls="layer-panel">
-            <span class="layer-toggle-icon" aria-hidden="true"></span>
-        </button>
         <button id="gps-button" type="button" aria-label="現在地を表示">
             <span class="gps-icon" aria-hidden="true"></span>
         </button>
     </div>
 
-    <div id="layer-panel" class="hidden">
+    <div id="layer-panel" class="collapsed">
         <div class="layer-panel-inner">
-            <h3>地図レイヤー</h3>
-            <div id="layer-list">
+            <button id="layer-panel-toggle" type="button" aria-label="レイヤーメニューを開閉" aria-expanded="false" aria-controls="layer-panel-content">
+                <span class="layer-panel-grip" aria-hidden="true"></span>
+                <span class="layer-panel-icon" aria-hidden="true"></span>
+            </button>
+            <div id="layer-panel-summary" aria-live="polite"></div>
+            <div id="layer-panel-content" class="hidden">
+                <h3>地図レイヤー</h3>
+                <div id="layer-list">
+                </div>
             </div>
         </div>
     </div>

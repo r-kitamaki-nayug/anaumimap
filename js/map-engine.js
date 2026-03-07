@@ -10,7 +10,9 @@ class OkayamaMapApp {
         this.infoPopupTitle = null;
         this.infoPopupBody = null;
         this.layerPanel = document.getElementById('layer-panel');
-        this.layerToggleButton = document.getElementById('layer-toggle-button');
+        this.layerPanelToggle = document.getElementById('layer-panel-toggle');
+        this.layerPanelContent = document.getElementById('layer-panel-content');
+        this.layerPanelSummary = document.getElementById('layer-panel-summary');
 
         // 1. ベースマップを配置
         L.tileLayer(baseMap.url, { attribution: baseMap.attribution }).addTo(this.map);
@@ -19,10 +21,12 @@ class OkayamaMapApp {
         this.createInfoPopup();
         this.renderLayerList();
         this.setupLayerPanel();
+        this.updateControlsOffset();
         
         // 3. GPSボタン設定
         document.getElementById('gps-button').onclick = () => this.showLocation();
         this.map.on('locationfound', (e) => this.handleLocationFound(e));
+        window.addEventListener('resize', () => this.updateControlsOffset());
     }
 
     renderLayerList() {
@@ -39,17 +43,12 @@ class OkayamaMapApp {
                         <span class="layer-name">${data.name}</span>
                     </button>
                 </div>
-                <div class="opacity-group">
-                    <span>透過</span>
-                    <input type="range" class="opacity" data-id="${data.id}" min="0" max="1" step="0.1" value="${data.defaultOpacity}">
-                </div>
             `;
             listContainer.appendChild(item);
 
             // イベント紐付け
             item.querySelector('.toggle').onchange = (e) => this.toggleLayer(e.target.checked, data);
             item.querySelector('.layer-name-button').onclick = () => this.openInfoPopup(data);
-            item.querySelector('.opacity').oninput = (e) => this.setOpacity(data.id, e.target.value);
         });
     }
 
@@ -87,20 +86,13 @@ class OkayamaMapApp {
     }
 
     setupLayerPanel() {
-        this.layerToggleButton.onclick = (e) => {
-            e.stopPropagation();
+        this.layerPanelToggle.onclick = () => {
             this.toggleLayerPanel();
         };
-
-        this.layerPanel.onclick = (e) => e.stopPropagation();
-
-        document.addEventListener('click', () => {
-            this.closeLayerPanel();
-        });
     }
 
     toggleLayerPanel() {
-        const isOpen = !this.layerPanel.classList.contains('hidden');
+        const isOpen = !this.layerPanel.classList.contains('collapsed');
         if (isOpen) {
             this.closeLayerPanel();
         } else {
@@ -109,13 +101,17 @@ class OkayamaMapApp {
     }
 
     openLayerPanel() {
-        this.layerPanel.classList.remove('hidden');
-        this.layerToggleButton.setAttribute('aria-expanded', 'true');
+        this.layerPanel.classList.remove('collapsed');
+        this.layerPanelContent.classList.remove('hidden');
+        this.layerPanelToggle.setAttribute('aria-expanded', 'true');
+        this.updateControlsOffset();
     }
 
     closeLayerPanel() {
-        this.layerPanel.classList.add('hidden');
-        this.layerToggleButton.setAttribute('aria-expanded', 'false');
+        this.layerPanel.classList.add('collapsed');
+        this.layerPanelContent.classList.add('hidden');
+        this.layerPanelToggle.setAttribute('aria-expanded', 'false');
+        this.updateControlsOffset();
     }
 
     toggleLayer(isVisible, data) {
@@ -125,17 +121,77 @@ class OkayamaMapApp {
                 opacity: data.defaultOpacity,
                 zIndex: data.zIndex
             }).addTo(this.map);
-            this.activeLayers[data.id] = { layer, data };
+            this.activeLayers[data.id] = {
+                layer,
+                data,
+                opacity: data.defaultOpacity
+            };
         } else {
             if (this.activeLayers[data.id]) {
                 this.map.removeLayer(this.activeLayers[data.id].layer);
                 delete this.activeLayers[data.id];
             }
         }
+
+        this.updateLayerPanelSummary();
     }
 
     setOpacity(id, val) {
-        if (this.activeLayers[id]) this.activeLayers[id].layer.setOpacity(val);
+        if (!this.activeLayers[id]) {
+            return;
+        }
+
+        const opacity = Number(val);
+        this.activeLayers[id].opacity = opacity;
+        this.activeLayers[id].layer.setOpacity(opacity);
+    }
+
+    updateLayerPanelSummary() {
+        const activeEntries = overlays
+            .filter((data) => this.activeLayers[data.id])
+            .map((data) => this.activeLayers[data.id]);
+
+        this.layerPanelSummary.innerHTML = '';
+
+        if (activeEntries.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'layer-panel-summary-empty';
+            empty.textContent = '選択中のレイヤーはありません';
+            this.layerPanelSummary.appendChild(empty);
+            return;
+        }
+
+        activeEntries.forEach((entry) => {
+            const item = document.createElement('div');
+            item.className = 'layer-panel-summary-item';
+            item.innerHTML = `
+                <span class="layer-panel-summary-year">${entry.data.year ?? ''}</span>
+                <span class="layer-panel-summary-name">${this.getShortLayerName(entry.data.name)}</span>
+                <input
+                    type="range"
+                    class="layer-panel-summary-slider"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value="${entry.opacity}"
+                    aria-label="${entry.data.name} の透過度"
+                >
+            `;
+
+            item.querySelector('.layer-panel-summary-slider').oninput = (e) => this.setOpacity(entry.data.id, e.target.value);
+            this.layerPanelSummary.appendChild(item);
+        });
+
+        this.updateControlsOffset();
+    }
+
+    getShortLayerName(name) {
+        return name.length > 8 ? `${name.slice(0, 8)}...` : name;
+    }
+
+    updateControlsOffset() {
+        const panelHeight = this.layerPanel ? this.layerPanel.offsetHeight : 0;
+        document.documentElement.style.setProperty('--controls-bottom-offset', `${panelHeight + 18}px`);
     }
 
     showLocation() {

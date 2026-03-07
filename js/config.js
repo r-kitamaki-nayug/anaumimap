@@ -18,9 +18,9 @@ export const overlays = [
         zIndex: 140
     },
     {
-        id: "16600_ikeda",
+        id: "1660_ikeda",
         name: "岡山城周辺地図(池田家岡山古図)",
-        year: 16600,
+        year: 1660,
         url: "https://mapwarper.h-gis.jp/maps/tile/5139/{z}/{x}/{y}.png",
         attribution: "この地図は1800年に原田茂嘉によって写されたものです。原田氏の分析によれば、1660年頃（江戸時代初期）の岡山の姿を伝えています。一部、道や名前に書き間違いの可能性があるとされていますが、当時の貴重な資料を忠実に再現したものです",
         defaultOpacity: 0.5,

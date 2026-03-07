@@ -4,6 +4,11 @@ html, body {
     padding: 0;
     width: 100%;
     height: 100%;
+    font-family: "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+}
+
+:root {
+    --controls-bottom-offset: 84px;
 }
 
 /* 地図の大きさを指定（これが無いと表示されません） */
@@ -13,10 +18,41 @@ html, body {
     z-index: 1;
 }
 
+#app-header {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    max-width: min(420px, calc(100vw - 96px));
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    backdrop-filter: blur(8px);
+}
+
+#app-header h1 {
+    margin: 0;
+    color: #183153;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+#app-header p {
+    margin: 6px 0 0;
+    color: #44556e;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
 /* 操作パネルを地図の上に浮かせる */
 #controls {
     position: absolute;
-    bottom: 10px;
+    bottom: var(--controls-bottom-offset);
     right: 10px;
     z-index: 1000; /* 地図より前面に */
     display: flex;
@@ -24,7 +60,6 @@ html, body {
     gap: 8px;
 }
 
-#layer-toggle-button,
 #gps-button {
     width: 48px;
     height: 48px;
@@ -38,50 +73,140 @@ html, body {
     justify-content: center;
 }
 
-.layer-toggle-icon {
-    position: relative;
-    width: 20px;
-    height: 14px;
-    border: 2px solid #1f4fa3;
-    border-radius: 3px;
-    background: rgba(31, 79, 163, 0.18);
+#layer-panel {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 1000;
+    pointer-events: none;
 }
 
-.layer-toggle-icon::before,
-.layer-toggle-icon::after {
+.layer-panel-inner {
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+}
+
+#layer-panel-toggle {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px 14px;
+    border: none;
+    background: transparent;
+    color: #183153;
+    cursor: pointer;
+}
+
+.layer-panel-grip {
+    width: 44px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(24, 49, 83, 0.24);
+}
+
+.layer-panel-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.layer-panel-icon {
+    position: relative;
+    width: 18px;
+    height: 12px;
+    border: 1.5px solid #1f4fa3;
+    border-radius: 3px;
+    margin-top: 8px;
+    margin-bottom: -5px;
+    background: rgba(31, 79, 163, 0.18);
+    box-sizing: border-box;
+}
+
+.layer-panel-icon::before,
+.layer-panel-icon::after {
     content: "";
     position: absolute;
     left: 2px;
     width: 100%;
     height: 100%;
-    border: 2px solid #1f4fa3;
+    border: 1.5px solid #1f4fa3;
     border-radius: 3px;
     background: rgba(31, 79, 163, 0.12);
+    box-sizing: border-box;
 }
 
-.layer-toggle-icon::before {
-    top: -6px;
+.layer-panel-icon::before {
+    top: -4px;
 }
 
-.layer-toggle-icon::after {
-    top: -10px;
+.layer-panel-icon::after {
+    top: -7px;
 }
 
-#layer-panel {
-    position: absolute;
-    bottom: 10px;
-    right: 68px;
-    width: 280px;
-    max-height: 80vh;
+#layer-panel-summary {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 12px 12px;
+    box-sizing: border-box;
+}
+
+.layer-panel-summary-empty {
+    color: #58708f;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.layer-panel-summary-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) minmax(96px, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(241, 245, 249, 0.95);
+}
+
+.layer-panel-summary-year {
+    color: #58708f;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.layer-panel-summary-name {
+    min-width: 0;
+    color: #183153;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.layer-panel-summary-slider {
+    width: 100%;
+}
+
+#layer-panel-content {
+    max-height: calc(50vh - 64px);
     overflow-y: auto;
-    z-index: 1000;
+    padding: 0 15px 15px;
 }
 
-.layer-panel-inner {
-    background: rgba(255, 255, 255, 0.96);
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+#layer-panel.collapsed .layer-panel-inner {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
 }
 
 h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
@@ -121,9 +246,6 @@ h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bott
     font-weight: bold;
     line-height: 1.3;
 }
-.opacity-group { display: flex; align-items: center; gap: 10px; font-size: 12px; }
-.opacity-group input { flex-grow: 1; }
-
 .gps-icon {
     position: relative;
     width: 22px;
