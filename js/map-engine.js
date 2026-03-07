@@ -26,6 +26,7 @@ class OkayamaMapApp {
         this.createInfoPopup();
         this.renderLayerList();
         this.setupLayerPanel();
+        this.updateLayerPanelSummary();
         this.updateControlsOffset();
         
         // 3. GPSボタン設定
@@ -171,8 +172,9 @@ class OkayamaMapApp {
         if (activeEntries.length === 0) {
             const empty = document.createElement('div');
             empty.className = 'layer-panel-summary-empty';
-            empty.textContent = '選択中のレイヤーはありません';
+            empty.textContent = 'レイヤーが選択されていません';
             this.layerPanelSummary.appendChild(empty);
+            this.updateControlsOffset();
             return;
         }
 
