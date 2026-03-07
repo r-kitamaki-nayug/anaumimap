@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>岡山-海岸線探訪MAP</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div id="map"></div>
+
+    <div id="controls">
+        <button id="layer-toggle-button" type="button" aria-label="地図レイヤーを開く" aria-expanded="false" aria-controls="layer-panel">
+            <span class="layer-toggle-icon" aria-hidden="true"></span>
+        </button>
+        <button id="gps-button" type="button" aria-label="現在地を表示">
+            <span class="gps-icon" aria-hidden="true"></span>
+        </button>
+    </div>
+
+    <div id="layer-panel" class="hidden">
+        <div class="layer-panel-inner">
+            <h3>地図レイヤー</h3>
+            <div id="layer-list">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="js/map-engine.js"></script>
+</body>
+</html>

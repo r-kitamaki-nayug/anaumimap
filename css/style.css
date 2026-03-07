@@ -1,0 +1,196 @@
+/* 全画面表示のための設定 */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* 地図の大きさを指定（これが無いと表示されません） */
+#map {
+    width: 100%;
+    height: 100vh; /* 画面いっぱいの高さ */
+    z-index: 1;
+}
+
+/* 操作パネルを地図の上に浮かせる */
+#controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000; /* 地図より前面に */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#layer-toggle-button,
+#gps-button {
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.layer-toggle-icon {
+    position: relative;
+    width: 20px;
+    height: 14px;
+    border: 2px solid #1f4fa3;
+    border-radius: 3px;
+    background: rgba(31, 79, 163, 0.18);
+}
+
+.layer-toggle-icon::before,
+.layer-toggle-icon::after {
+    content: "";
+    position: absolute;
+    left: 2px;
+    width: 100%;
+    height: 100%;
+    border: 2px solid #1f4fa3;
+    border-radius: 3px;
+    background: rgba(31, 79, 163, 0.12);
+}
+
+.layer-toggle-icon::before {
+    top: -6px;
+}
+
+.layer-toggle-icon::after {
+    top: -10px;
+}
+
+#layer-panel {
+    position: absolute;
+    top: 10px;
+    right: 68px;
+    width: 280px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.layer-panel-inner {
+    background: rgba(255, 255, 255, 0.96);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+
+/* 以下、前回送っていただいたパーツのスタイル */
+.layer-item {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.layer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.layer-toggle-label { display: flex; align-items: center; }
+.layer-name-button {
+    flex: 1;
+    margin-left: 8px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: #1f4fa3;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+.layer-name-button:hover { text-decoration: underline; }
+.opacity-group { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.opacity-group input { flex-grow: 1; }
+.order-group { margin-top: 5px; display: flex; gap: 5px; }
+.order-group button { font-size: 10px; padding: 2px 8px; cursor: pointer; flex: 1; }
+
+.gps-icon {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #1f4fa3;
+    border-radius: 50%;
+    box-sizing: border-box;
+    background: radial-gradient(circle, #1f4fa3 0 3px, transparent 3px);
+}
+
+.gps-icon::before,
+.gps-icon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    background: #1f4fa3;
+    transform: translate(-50%, -50%);
+}
+
+.gps-icon::before {
+    width: 2px;
+    height: 30px;
+}
+
+.gps-icon::after {
+    width: 30px;
+    height: 2px;
+}
+
+.hidden { display: none; }
+
+.info-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+}
+
+.info-popup-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.info-popup-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(90vw, 420px);
+    max-height: 70vh;
+    overflow-y: auto;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.info-popup-close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    border: none;
+    background: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.info-popup-title {
+    margin: 0 28px 10px 0;
+    font-size: 16px;
+}
+
+.info-popup-body {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
