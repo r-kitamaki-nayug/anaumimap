@@ -255,7 +255,7 @@ class OkayamaMapApp {
         const baseMapItem = document.createElement('div');
         baseMapItem.className = 'layer-panel-summary-item layer-panel-summary-item-base';
         baseMapItem.innerHTML = `
-            <span class="layer-panel-summary-year">基本</span>
+            <span class="layer-panel-summary-year">現代</span>
             <span class="layer-panel-summary-name">地理院地図</span>
             <input
                 type="range"
