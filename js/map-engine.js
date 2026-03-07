@@ -280,8 +280,6 @@ class OkayamaMapApp {
         } else {
             this.locationMarker.setLatLng(e.latlng);
         }
-
-        this.locationMarker.bindPopup("現在地").openPopup();
     }
 }
 

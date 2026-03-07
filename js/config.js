@@ -45,6 +45,20 @@ export const overlays = [
         zIndex: 50
     },
     {
+        id: "1945_aerial_v2",
+        name: "航空写真 (広域版)",
+        year: 1945,
+        // URLの末尾を .jpg から .png に変えるか、ディレクトリを確認します
+        url: "https://cyberjapandata.gsi.go.jp/xyz/ort_USA10/{z}/{x}/{y}.png", 
+        attribution: "国土地理院",
+        description: "戦後直後の米軍撮影による航空写真です。1945か〜50年当時の岡山の姿を詳細に映し出します。",
+        defaultOpacity: 0.8,
+        zIndex: 150,
+        // ズーム対策
+        maxNativeZoom: 17,
+        maxZoom: 20
+    },
+    {
         id: "1974_picture",
         name: "航空写真",
         year: 1974,
