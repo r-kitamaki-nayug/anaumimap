@@ -9,7 +9,15 @@ export const baseMap = {
 // 重ねる古地図のリスト
 export const overlays = [
     {
-        id: "meiji_swale",
+        id: "chisui_bunruizu",
+        name: "治水地形分類図 (地盤の履歴書)",
+        year: "∞",
+        url: "https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png",
+        description: "色で地面の成り立ちが分かる地図です。水色は昔の川や湿地、紫色は江戸時代以降に海を陸地にした干拓地を示しています。黄色や橙色は少し高い場所です。",        defaultOpacity: 0.8,
+        zIndex: 140
+    },
+    {
+        id: "1880_meiji",
         name: "明治期の海岸線",
         year: 1880,
         url: "https://cyberjapandata.gsi.go.jp/xyz/swale/{z}/{x}/{y}.png",
@@ -18,14 +26,14 @@ export const overlays = [
         zIndex: 50
     },
     {
-        id: "1970_aerial",
+        id: "1974_picture",
         name: "航空写真",
         year: 1974,
         url: "https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg",
         description: "国土地理院┃高度経済成長期の岡山。児島湾の締切堤防が完成し、現在の南区の形がほぼ定まった時期の姿です。",
         defaultOpacity: 0.8,
         zIndex: 140
-    }
+    },
 
     // ここに新しいMapWarperのデータを追加していくだけで、UIに自動反映されます
 ];

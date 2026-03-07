@@ -16,7 +16,7 @@ html, body {
 /* 操作パネルを地図の上に浮かせる */
 #controls {
     position: absolute;
-    top: 10px;
+    bottom: 10px;
     right: 10px;
     z-index: 1000; /* 地図より前面に */
     display: flex;
@@ -69,7 +69,7 @@ html, body {
 
 #layer-panel {
     position: absolute;
-    top: 10px;
+    bottom: 10px;
     right: 68px;
     width: 280px;
     max-height: 80vh;
