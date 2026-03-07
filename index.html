@@ -8,14 +8,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="css/style.css?v=1.0.2" />
+    <link rel="stylesheet" href="css/style.css?v=1.0.4" />
 </head>
 <body>
     <div id="map"></div>
 
     <header id="app-header">
-        <h1>📍重ねて見れる岡山の昔MAP</h1>
-        <!-- <p>岡山のいろいろな年代の地図を重ねて見れます。</p> -->
+        <button id="app-header-toggle" type="button" aria-label="タイトルバーを開閉" aria-expanded="true">
+            <img class="app-header-logo" src="img/logo.png" alt="NAYUG.labo ロゴ" />
+            <span class="app-header-copy">
+                <span class="app-header-title">岡山の歴史を重ねて見るMAP</span>
+                <span class="app-header-subtitle">by <a href="https://nayug.jp" target="_blank">NAYUG.Labo</a></span>
+            </span>
+        </button>
     </header>
 
     <div id="controls">
@@ -40,6 +45,6 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script type="module" src="js/map-engine.js?v=1.0.3"></script>
+    <script type="module" src="js/map-engine.js?v=1.0.5"></script>
 </body>
 </html>

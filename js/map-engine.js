@@ -1,14 +1,20 @@
-import { baseMap, overlays } from './config.js';
+import { overlays } from './config.js';
+import { OkayamaMapView } from './map-view.js';
+
+const NEW_BADGE_WINDOW_DAYS = 7;
+const HEADER_AUTO_COLLAPSE_MS = 5000;
+const NEW_LAYER_NOTICE_MS = 5000;
 
 class OkayamaMapApp {
     constructor() {
-        // 初期表示を岡山駅付近に設定
-        this.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([34.6664, 133.9186], 13);
-        this.activeLayers = {}; // 表示中の Leaflet レイヤーを保持
-        this.locationMarker = null;
         this.infoPopup = null;
         this.infoPopupTitle = null;
         this.infoPopupBody = null;
+        this.appHeader = document.getElementById('app-header');
+        this.appHeaderToggle = document.getElementById('app-header-toggle');
+        this.appHeaderCollapseTimer = null;
+        this.newLayerNotice = null;
+        this.newLayerNoticeTimer = null;
         this.layerPanel = document.getElementById('layer-panel');
         this.layerPanelToggle = document.getElementById('layer-panel-toggle');
         this.layerPanelContent = document.getElementById('layer-panel-content');
@@ -19,20 +25,22 @@ class OkayamaMapApp {
         this.lastKnownPanelDeltaY = 0;
         this.ignoreNextToggleClick = false;
 
-        // 1. ベースマップを配置
-        L.tileLayer(baseMap.url, { attribution: baseMap.attribution }).addTo(this.map);
+        this.mapView = new OkayamaMapView({
+            onMapClick: () => this.handleMapClick()
+        });
 
         // 2. UIの生成
         this.createInfoPopup();
+        this.createNewLayerNotice();
+        this.setupHeader();
         this.renderLayerList();
         this.setupLayerPanel();
         this.updateLayerPanelSummary();
         this.updateControlsOffset();
+        this.showNewLayerNoticeIfNeeded();
         
         // 3. GPSボタン設定
-        document.getElementById('gps-button').onclick = () => this.showLocation();
-        this.map.on('locationfound', (e) => this.handleLocationFound(e));
-        this.map.on('click', () => this.handleMapClick());
+        document.getElementById('gps-button').onclick = () => this.mapView.showLocation();
         window.addEventListener('resize', () => this.updateControlsOffset());
     }
 
@@ -47,7 +55,7 @@ class OkayamaMapApp {
                     <label class="layer-toggle-label"><input type="checkbox" class="toggle" data-id="${data.id}"></label>
                     <button type="button" class="layer-name-button" data-id="${data.id}">
                         <span class="layer-year">${data.year ?? ''}</span>
-                        <span class="layer-name">${data.name}</span>
+                        <span class="layer-name">${data.name}${this.getNewBadgeMarkup(data)}</span>
                     </button>
                 </div>
             `;
@@ -79,6 +87,101 @@ class OkayamaMapApp {
 
         popup.querySelector('.info-popup-close').onclick = () => this.closeInfoPopup();
         popup.querySelector('.info-popup-backdrop').onclick = () => this.closeInfoPopup();
+    }
+
+    createNewLayerNotice() {
+        const notice = document.createElement('button');
+        notice.type = 'button';
+        notice.className = 'new-layer-notice';
+        notice.setAttribute('aria-label', '新しいレイヤーのお知らせ');
+        notice.setAttribute('aria-hidden', 'true');
+        notice.onclick = () => {
+            this.hideNewLayerNotice({ immediate: true });
+            this.openLayerPanel();
+        };
+
+        document.body.appendChild(notice);
+        this.newLayerNotice = notice;
+    }
+
+    setupHeader() {
+        if (!this.appHeaderToggle) {
+            return;
+        }
+
+        this.appHeaderToggle.onclick = () => {
+            const isCollapsed = this.appHeader.classList.contains('collapsed');
+            this.setHeaderCollapsed(!isCollapsed);
+        };
+
+        this.scheduleHeaderAutoCollapse();
+    }
+
+    setHeaderCollapsed(collapsed) {
+        if (!this.appHeader || !this.appHeaderToggle) {
+            return;
+        }
+
+        this.appHeader.classList.toggle('collapsed', collapsed);
+        this.appHeaderToggle.setAttribute('aria-expanded', String(!collapsed));
+
+        if (collapsed) {
+            this.clearHeaderAutoCollapse();
+        } else {
+            this.scheduleHeaderAutoCollapse();
+        }
+    }
+
+    scheduleHeaderAutoCollapse() {
+        this.clearHeaderAutoCollapse();
+        this.appHeaderCollapseTimer = window.setTimeout(() => {
+            this.setHeaderCollapsed(true);
+        }, HEADER_AUTO_COLLAPSE_MS);
+    }
+
+    clearHeaderAutoCollapse() {
+        if (this.appHeaderCollapseTimer !== null) {
+            window.clearTimeout(this.appHeaderCollapseTimer);
+            this.appHeaderCollapseTimer = null;
+        }
+    }
+
+    showNewLayerNoticeIfNeeded() {
+        const recentOverlays = overlays.filter((data) => this.isRecentlyAdded(data));
+        if (recentOverlays.length === 0 || !this.newLayerNotice) {
+            return;
+        }
+
+        const message = recentOverlays.length === 1
+            ? `📣 ${recentOverlays[0].year} ${recentOverlays[0].name} が追加されました`
+            : `📣 ${recentOverlays[0].year} ${recentOverlays[0].name} ほか${recentOverlays.length}件のレイヤーが追加されました`;
+
+        this.newLayerNotice.textContent = message;
+        this.newLayerNotice.classList.remove('no-transition');
+        this.newLayerNotice.classList.add('is-visible');
+        this.newLayerNotice.setAttribute('aria-hidden', 'false');
+        this.clearNewLayerNoticeTimer();
+        this.newLayerNoticeTimer = window.setTimeout(() => {
+            this.hideNewLayerNotice();
+        }, NEW_LAYER_NOTICE_MS);
+    }
+
+    hideNewLayerNotice({ immediate = false } = {}) {
+        if (!this.newLayerNotice) {
+            return;
+        }
+
+        this.newLayerNotice.classList.toggle('no-transition', immediate);
+        this.newLayerNotice.classList.remove('is-visible');
+        this.newLayerNotice.setAttribute('aria-hidden', 'true');
+        this.clearNewLayerNoticeTimer();
+    }
+
+    clearNewLayerNoticeTimer() {
+        if (this.newLayerNoticeTimer !== null) {
+            window.clearTimeout(this.newLayerNoticeTimer);
+            this.newLayerNoticeTimer = null;
+        }
     }
 
     openInfoPopup(data) {
@@ -131,48 +234,45 @@ class OkayamaMapApp {
     }
 
     toggleLayer(isVisible, data) {
-        if (isVisible) {
-            const layer = L.tileLayer(data.url, {
-                attribution: data.attribution,
-                opacity: data.defaultOpacity,
-                zIndex: data.zIndex
-            }).addTo(this.map);
-            this.activeLayers[data.id] = {
-                layer,
-                data,
-                opacity: data.defaultOpacity
-            };
-        } else {
-            if (this.activeLayers[data.id]) {
-                this.map.removeLayer(this.activeLayers[data.id].layer);
-                delete this.activeLayers[data.id];
-            }
-        }
-
+        this.mapView.setOverlayVisibility(data, isVisible);
         this.updateLayerPanelSummary();
     }
 
     setOpacity(id, val) {
-        if (!this.activeLayers[id]) {
-            return;
-        }
+        this.mapView.setOverlayOpacity(id, val);
+    }
 
-        const opacity = Number(val);
-        this.activeLayers[id].opacity = opacity;
-        this.activeLayers[id].layer.setOpacity(opacity);
+    setBaseMapOpacity(val) {
+        this.mapView.setBaseMapOpacity(val);
     }
 
     updateLayerPanelSummary() {
-        const activeEntries = overlays
-            .filter((data) => this.activeLayers[data.id])
-            .map((data) => this.activeLayers[data.id]);
+        const activeEntries = this.mapView.getActiveEntriesInOrder(overlays);
 
         this.layerPanelSummary.innerHTML = '';
+
+        const baseMapItem = document.createElement('div');
+        baseMapItem.className = 'layer-panel-summary-item layer-panel-summary-item-base';
+        baseMapItem.innerHTML = `
+            <span class="layer-panel-summary-year">基本</span>
+            <span class="layer-panel-summary-name">地理院地図</span>
+            <input
+                type="range"
+                class="layer-panel-summary-slider"
+                min="0"
+                max="1"
+                step="0.1"
+                value="${this.mapView.getBaseMapOpacity()}"
+                aria-label="基本地図の透過度"
+            >
+        `;
+        baseMapItem.querySelector('.layer-panel-summary-slider').oninput = (e) => this.setBaseMapOpacity(e.target.value);
+        this.layerPanelSummary.appendChild(baseMapItem);
 
         if (activeEntries.length === 0) {
             const empty = document.createElement('div');
             empty.className = 'layer-panel-summary-empty';
-            empty.textContent = 'レイヤーが選択されていません';
+            empty.textContent = '追加レイヤーが選択されていません';
             this.layerPanelSummary.appendChild(empty);
             this.updateControlsOffset();
             return;
@@ -183,7 +283,7 @@ class OkayamaMapApp {
             item.className = 'layer-panel-summary-item';
             item.innerHTML = `
                 <span class="layer-panel-summary-year">${entry.data.year ?? ''}</span>
-                <span class="layer-panel-summary-name">${this.getShortLayerName(entry.data.name)}</span>
+                <span class="layer-panel-summary-name">${this.getShortLayerName(entry.data.name)}${this.getNewBadgeMarkup(entry.data)}</span>
                 <input
                     type="range"
                     class="layer-panel-summary-slider"
@@ -204,6 +304,27 @@ class OkayamaMapApp {
 
     getShortLayerName(name) {
         return name.length > 8 ? `${name.slice(0, 8)}...` : name;
+    }
+
+    getNewBadgeMarkup(data) {
+        return this.isRecentlyAdded(data) ? '<span class="new-badge">NEW</span>' : '';
+    }
+
+    isRecentlyAdded(data) {
+        if (!data.addedAt) {
+            return false;
+        }
+
+        const addedDate = new Date(`${data.addedAt}T00:00:00`);
+        if (Number.isNaN(addedDate.getTime())) {
+            return false;
+        }
+
+        const now = new Date();
+        const diffMs = now.getTime() - addedDate.getTime();
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+        return diffDays >= 0 && diffDays < NEW_BADGE_WINDOW_DAYS;
     }
 
     handlePanelTouchStart(e) {
@@ -265,22 +386,10 @@ class OkayamaMapApp {
         document.documentElement.style.setProperty('--controls-bottom-offset', `${panelHeight + 18}px`);
     }
 
-    showLocation() {
-        this.map.locate({setView: true, maxZoom: 15});
-    }
-
     handleMapClick() {
         const isOpen = !this.layerPanel.classList.contains('collapsed');
         if (isOpen) {
             this.closeLayerPanel();
-        }
-    }
-
-    handleLocationFound(e) {
-        if (!this.locationMarker) {
-            this.locationMarker = L.marker(e.latlng).addTo(this.map);
-        } else {
-            this.locationMarker.setLatLng(e.latlng);
         }
     }
 }
