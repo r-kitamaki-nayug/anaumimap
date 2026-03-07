@@ -31,6 +31,7 @@ class OkayamaMapApp {
         // 3. GPSボタン設定
         document.getElementById('gps-button').onclick = () => this.showLocation();
         this.map.on('locationfound', (e) => this.handleLocationFound(e));
+        this.map.on('click', () => this.handleMapClick());
         window.addEventListener('resize', () => this.updateControlsOffset());
     }
 
@@ -264,6 +265,13 @@ class OkayamaMapApp {
 
     showLocation() {
         this.map.locate({setView: true, maxZoom: 15});
+    }
+
+    handleMapClick() {
+        const isOpen = !this.layerPanel.classList.contains('collapsed');
+        if (isOpen) {
+            this.closeLayerPanel();
+        }
     }
 
     handleLocationFound(e) {
