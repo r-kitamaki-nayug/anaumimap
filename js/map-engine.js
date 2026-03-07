@@ -50,6 +50,7 @@ class OkayamaMapApp {
         overlays.forEach(data => {
             const item = document.createElement('div');
             item.className = 'layer-item';
+            item.dataset.timelineYear = data.year ?? '';
             item.innerHTML = `
                 <div class="layer-header">
                     <label class="layer-toggle-label"><input type="checkbox" class="toggle" data-id="${data.id}"></label>
