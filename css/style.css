@@ -5,6 +5,7 @@ html, body {
     width: 100%;
     height: 100%;
     font-family: "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+    touch-action: manipulation;
 }
 
 :root {
@@ -71,6 +72,7 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
+    touch-action: manipulation;
 }
 
 #layer-panel {
@@ -102,6 +104,7 @@ html, body {
     background: transparent;
     color: #183153;
     cursor: pointer;
+    touch-action: manipulation;
 }
 
 .layer-panel-grip {
@@ -234,6 +237,7 @@ h3 { margin-top: 0; font-size: 16px; border-bottom: 1px solid #ccc; padding-bott
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
+    touch-action: manipulation;
 }
 .layer-name-button:hover { text-decoration: underline; }
 .layer-year {
