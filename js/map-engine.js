@@ -13,6 +13,11 @@ class OkayamaMapApp {
         this.layerPanelToggle = document.getElementById('layer-panel-toggle');
         this.layerPanelContent = document.getElementById('layer-panel-content');
         this.layerPanelSummary = document.getElementById('layer-panel-summary');
+        this.panelTouchStartY = null;
+        this.panelTouchStartX = null;
+        this.panelTouchMoved = false;
+        this.lastKnownPanelDeltaY = 0;
+        this.ignoreNextToggleClick = false;
 
         // 1. ベースマップを配置
         L.tileLayer(baseMap.url, { attribution: baseMap.attribution }).addTo(this.map);
@@ -87,8 +92,17 @@ class OkayamaMapApp {
 
     setupLayerPanel() {
         this.layerPanelToggle.onclick = () => {
+            if (this.ignoreNextToggleClick) {
+                this.ignoreNextToggleClick = false;
+                return;
+            }
             this.toggleLayerPanel();
         };
+
+        this.layerPanelToggle.addEventListener('touchstart', (e) => this.handlePanelTouchStart(e), { passive: true });
+        this.layerPanelToggle.addEventListener('touchmove', (e) => this.handlePanelTouchMove(e), { passive: false });
+        this.layerPanelToggle.addEventListener('touchend', () => this.handlePanelTouchEnd());
+        this.layerPanelToggle.addEventListener('touchcancel', () => this.resetPanelTouchState());
     }
 
     toggleLayerPanel() {
@@ -187,6 +201,60 @@ class OkayamaMapApp {
 
     getShortLayerName(name) {
         return name.length > 8 ? `${name.slice(0, 8)}...` : name;
+    }
+
+    handlePanelTouchStart(e) {
+        if (e.touches.length !== 1) {
+            this.resetPanelTouchState();
+            return;
+        }
+
+        this.panelTouchStartY = e.touches[0].clientY;
+        this.panelTouchStartX = e.touches[0].clientX;
+        this.panelTouchMoved = false;
+    }
+
+    handlePanelTouchMove(e) {
+        if (this.panelTouchStartY === null || this.panelTouchStartX === null || e.touches.length !== 1) {
+            return;
+        }
+
+        const deltaY = e.touches[0].clientY - this.panelTouchStartY;
+        const deltaX = e.touches[0].clientX - this.panelTouchStartX;
+        this.lastKnownPanelDeltaY = deltaY;
+
+        if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 8) {
+            this.panelTouchMoved = true;
+            e.preventDefault();
+        }
+    }
+
+    handlePanelTouchEnd() {
+        if (this.panelTouchStartY === null) {
+            return;
+        }
+
+        const isOpen = !this.layerPanel.classList.contains('collapsed');
+        const lastDeltaY = this.panelTouchMoved ? (this.lastKnownPanelDeltaY ?? 0) : 0;
+
+        if (this.panelTouchMoved && Math.abs(lastDeltaY) > 24) {
+            this.ignoreNextToggleClick = true;
+
+            if (lastDeltaY < 0 && !isOpen) {
+                this.openLayerPanel();
+            } else if (lastDeltaY > 0 && isOpen) {
+                this.closeLayerPanel();
+            }
+        }
+
+        this.resetPanelTouchState();
+    }
+
+    resetPanelTouchState() {
+        this.panelTouchStartY = null;
+        this.panelTouchStartX = null;
+        this.panelTouchMoved = false;
+        this.lastKnownPanelDeltaY = 0;
     }
 
     updateControlsOffset() {

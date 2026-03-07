@@ -91,6 +91,7 @@ html, body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
     backdrop-filter: blur(10px);
     overflow: hidden;
+    overscroll-behavior: contain;
 }
 
 #layer-panel-toggle {
@@ -104,7 +105,9 @@ html, body {
     background: transparent;
     color: #183153;
     cursor: pointer;
-    touch-action: manipulation;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .layer-panel-grip {
@@ -206,6 +209,8 @@ html, body {
     max-height: calc(50vh - 64px);
     overflow-y: auto;
     padding: 0 15px 15px;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 #layer-panel.collapsed .layer-panel-inner {
