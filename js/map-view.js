@@ -1,4 +1,4 @@
-import { baseMap } from './config.js?v=1.0.9';
+import { baseMap } from './config.js?v=1.1.5';
 
 export class OkayamaMapView {
     constructor({ onMapClick } = {}) {
@@ -21,12 +21,16 @@ export class OkayamaMapView {
     setOverlayVisibility(data, isVisible) {
         if (isVisible) {
             if (this.activeLayers[data.id]) {
-                this.map.removeLayer(this.activeLayers[data.id].layer);
+                this.removeOverlayEntry(data.id);
             }
 
-            const layer = L.tileLayer(data.url, this.buildOverlayOptions(data)).addTo(this.map);
+            const layerUrls = Array.isArray(data.urls) && data.urls.length > 0
+                ? data.urls
+                : [data.url];
+            const layers = layerUrls.map((url) => L.tileLayer(url, this.buildOverlayOptions(data)).addTo(this.map));
             this.activeLayers[data.id] = {
-                layer,
+                layer: layers[0],
+                layers,
                 data,
                 opacity: data.defaultOpacity
             };
@@ -34,9 +38,21 @@ export class OkayamaMapView {
         }
 
         if (this.activeLayers[data.id]) {
-            this.map.removeLayer(this.activeLayers[data.id].layer);
-            delete this.activeLayers[data.id];
+            this.removeOverlayEntry(data.id);
         }
+    }
+
+    removeOverlayEntry(id) {
+        const entry = this.activeLayers[id];
+        if (!entry) {
+            return;
+        }
+
+        entry.layers.forEach((layer) => {
+            this.map.removeLayer(layer);
+        });
+
+        delete this.activeLayers[id];
     }
 
     buildOverlayOptions(data) {
@@ -54,6 +70,10 @@ export class OkayamaMapView {
             options.maxZoom = data.maxZoom;
         }
 
+        if (data.minZoom !== undefined) {
+            options.minZoom = data.minZoom;
+        }
+
         return options;
     }
 
@@ -64,7 +84,9 @@ export class OkayamaMapView {
 
         const opacity = Number(val);
         this.activeLayers[id].opacity = opacity;
-        this.activeLayers[id].layer.setOpacity(opacity);
+        this.activeLayers[id].layers.forEach((layer) => {
+            layer.setOpacity(opacity);
+        });
     }
 
     setBaseMapOpacity(val) {

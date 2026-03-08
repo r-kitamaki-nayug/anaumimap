@@ -1,5 +1,5 @@
-import { overlays } from './config.js?v=1.0.9';
-import { OkayamaMapView } from './map-view.js?v=1.0.9';
+import { overlays } from './config.js?v=1.1.5';
+import { OkayamaMapView } from './map-view.js?v=1.1.5';
 
 const NEW_BADGE_WINDOW_DAYS = 7;
 const HEADER_AUTO_COLLAPSE_MS = 5000;
