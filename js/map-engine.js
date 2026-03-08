@@ -1,5 +1,5 @@
-import { overlays } from './config.js?v=1.1.5';
-import { OkayamaMapView } from './map-view.js?v=1.1.5';
+import { overlays, overlayTabs } from './config.js?v=1.1.6';
+import { OkayamaMapView } from './map-view.js?v=1.1.6';
 
 const NEW_BADGE_WINDOW_DAYS = 7;
 const HEADER_AUTO_COLLAPSE_MS = 5000;
@@ -21,6 +21,8 @@ class OkayamaMapApp {
         this.layerPanelToggle = document.getElementById('layer-panel-toggle');
         this.layerPanelContent = document.getElementById('layer-panel-content');
         this.layerPanelSummary = document.getElementById('layer-panel-summary');
+        this.layerTabList = document.getElementById('layer-tabs');
+        this.layerList = document.getElementById('layer-list');
         this.layerSelectAllToggle = document.getElementById('layer-select-all');
         this.layerSelectAllControl = document.querySelector('.layer-select-all');
         this.layerSelectAllHadAnyChecked = false;
@@ -29,6 +31,7 @@ class OkayamaMapApp {
         this.panelTouchMoved = false;
         this.lastKnownPanelDeltaY = 0;
         this.ignoreNextToggleClick = false;
+        this.activeTab = this.getDefaultTabId();
 
         this.mapView = new OkayamaMapView({
             onMapClick: () => this.handleMapClick()
@@ -39,6 +42,7 @@ class OkayamaMapApp {
         this.createInfoPopup();
         this.createNewLayerNotice();
         this.setupHeader();
+        this.renderLayerTabs();
         this.renderLayerList();
         this.setupLayerPanel();
         this.updateLayerPanelSummary();
@@ -52,9 +56,28 @@ class OkayamaMapApp {
     }
 
     renderLayerList() {
-        const listContainer = document.getElementById('layer-list');
-        
-        overlays.forEach(data => {
+        if (!this.layerList) {
+            return;
+        }
+
+        const listContainer = this.layerList;
+        const currentTab = this.getActiveTab();
+        const currentOverlays = this.getCurrentTabOverlays();
+
+        listContainer.innerHTML = '';
+        listContainer.classList.toggle('layer-list-timeline', currentTab?.listStyle === 'timeline');
+        listContainer.classList.toggle('layer-list-plain', currentTab?.listStyle !== 'timeline');
+
+        if (currentOverlays.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'layer-list-empty';
+            empty.textContent = 'このタブにはまだレイヤーがありません';
+            listContainer.appendChild(empty);
+            this.syncLayerSelectAllToggle();
+            return;
+        }
+
+        currentOverlays.forEach(data => {
             const item = document.createElement('div');
             item.className = 'layer-item';
             item.dataset.timelineYear = data.year ?? '';
@@ -75,6 +98,7 @@ class OkayamaMapApp {
             // イベント紐付け
             const toggle = item.querySelector('.toggle');
             const infoButton = item.querySelector('.layer-info-button');
+            toggle.checked = this.isOverlayActive(data.id);
 
             toggle.onchange = (e) => this.toggleLayer(e.target.checked, data);
             toggle.onclick = (e) => e.stopPropagation();
@@ -89,6 +113,72 @@ class OkayamaMapApp {
         });
 
         this.syncLayerSelectAllToggle();
+    }
+
+    renderLayerTabs() {
+        if (!this.layerTabList) {
+            return;
+        }
+
+        this.layerTabList.innerHTML = '';
+
+        overlayTabs.forEach((tab) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'layer-tab-button';
+            button.dataset.tabId = tab.id;
+            button.setAttribute('role', 'tab');
+            button.setAttribute('aria-controls', 'layer-list');
+            button.setAttribute('aria-selected', String(tab.id === this.activeTab));
+            button.tabIndex = tab.id === this.activeTab ? 0 : -1;
+            button.classList.toggle('is-active', tab.id === this.activeTab);
+            button.textContent = tab.label;
+            button.onclick = () => this.setActiveTab(tab.id);
+            this.layerTabList.appendChild(button);
+        });
+    }
+
+    setActiveTab(tabId) {
+        if (!this.getTabById(tabId) || tabId === this.activeTab) {
+            return;
+        }
+
+        this.activeTab = tabId;
+        this.renderLayerTabs();
+        this.renderLayerList();
+        this.updateControlsOffset();
+    }
+
+    getDefaultTabId() {
+        return overlayTabs.find((tab) => tab.isDefault)?.id ?? overlayTabs[0]?.id ?? 'default';
+    }
+
+    getTabById(tabId) {
+        return overlayTabs.find((tab) => tab.id === tabId) ?? null;
+    }
+
+    getOverlayTab(data) {
+        return data.tab ?? this.getDefaultTabId();
+    }
+
+    getCurrentTabOverlays() {
+        return overlays.filter((data) => this.getOverlayTab(data) === this.activeTab);
+    }
+
+    getVisibleLayerToggles() {
+        if (!this.layerList) {
+            return [];
+        }
+
+        return Array.from(this.layerList.querySelectorAll('.toggle'));
+    }
+
+    getActiveTab() {
+        return this.getTabById(this.activeTab);
+    }
+
+    isOverlayActive(id) {
+        return Boolean(this.mapView.activeLayers[id]);
     }
 
     createWelcomePopup() {
@@ -297,7 +387,7 @@ class OkayamaMapApp {
 
         if (this.layerSelectAllControl && this.layerSelectAllToggle) {
             const rememberLayerSelectionState = () => {
-                this.layerSelectAllHadAnyChecked = Array.from(document.querySelectorAll('.toggle'))
+                this.layerSelectAllHadAnyChecked = this.getVisibleLayerToggles()
                     .some((toggle) => toggle.checked);
             };
 
@@ -340,8 +430,8 @@ class OkayamaMapApp {
     }
 
     setAllLayersVisible(isVisible) {
-        overlays.forEach((data) => {
-            const toggle = document.querySelector(`.toggle[data-id="${data.id}"]`);
+        this.getCurrentTabOverlays().forEach((data) => {
+            const toggle = this.layerList?.querySelector(`.toggle[data-id="${data.id}"]`);
             if (toggle) {
                 toggle.checked = isVisible;
             }
@@ -362,7 +452,13 @@ class OkayamaMapApp {
             return;
         }
 
-        const toggles = Array.from(document.querySelectorAll('.toggle'));
+        const toggles = this.getVisibleLayerToggles();
+        if (toggles.length === 0) {
+            this.layerSelectAllToggle.checked = false;
+            this.layerSelectAllToggle.indeterminate = false;
+            return;
+        }
+
         const checkedCount = toggles.filter((toggle) => toggle.checked).length;
 
         this.layerSelectAllToggle.checked = checkedCount > 0 && checkedCount === toggles.length;

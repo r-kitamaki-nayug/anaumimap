@@ -9,9 +9,15 @@ export const baseMap = {
 // 重ねる古地図のリスト
 // `addedAt: "YYYY-MM-DD"` を付けると、追加から 7 日間 UI に NEW が表示されます。
 // タイル URL が複数に分かれている地図は `url` の代わりに `urls: ["...","..."]` を使えます。
+export const overlayTabs = [
+    { id: "map", label: "地図/地形", listStyle: "timeline", isDefault: true },
+    { id: "data", label: "データ", listStyle: "plain" }
+];
+
 export const overlays = [
     {
         id: "hillshade",
+        tab: "data",
         name: "地形の凹凸 (陰影起伏図)",
         year: "地形",
         url: "https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png",
@@ -22,6 +28,7 @@ export const overlays = [
     },
     {
         id: "relief",
+        tab: "data",
         name: "色別標高図",
         year: "地形",
         url: "https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png",
@@ -31,7 +38,52 @@ export const overlays = [
         addedAt: "2026-03-08"
     },
     {
+        id: "tsunami_risk",
+        tab: "data",
+        name: "津波浸水想定データ",
+        year: "現代",
+        url: "https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_pref_data/33/{z}/{x}/{y}.png",
+        attribution: "ハザードマップポータルサイトより┃黄色(0.3m）〜紫（20m）まで、色が濃いほど津波の深さが上がります。",
+        defaultOpacity: 0.5,
+        zIndex: 200, // 一番上に重ねるのがおすすめ
+        addedAt: "2026-03-08"
+    },
+    {
+        id: "shinsui_risk",
+        tab: "data",
+        name: "洪水浸水想定区域データ",
+        year: "現代",
+        url: "https://disaportaldata.gsi.go.jp/raster/01_flood_l1_shinsuishin_newlegend_data/{z}/{x}/{y}.png",
+        attribution: "ハザードマップポータルサイトより┃黄色(0.3m）〜紫（20m）まで、色が濃いほど津波の深さが上がります。",
+        defaultOpacity: 0.5,
+        zIndex: 200, // 一番上に重ねるのがおすすめ
+        addedAt: "2026-03-08"
+    },
+    {
+        id: "dosha_risk",
+        tab: "data",
+        name: "土砂災害警戒区域データ",
+        year: "現代",
+        url: "https://disaportaldata.gsi.go.jp/raster/05_kyukeishakeikaikuiki_data/33/{z}/{x}/{y}.png",
+        attribution: "ハザードマップポータルサイトより┃黄色(警戒）〜赤（特別警戒）まで。点線の場合は今後指定される可能性があります。",
+        defaultOpacity: 0.5,
+        zIndex: 200, // 一番上に重ねるのがおすすめ
+        addedAt: "2026-03-08"
+    },
+    {
+        id: "slope_map",
+        tab: "data",
+        name: "地形の傾き (傾斜量図)",
+        year: "∞",
+        url: "https://cyberjapandata.gsi.go.jp/xyz/slopemap/{z}/{x}/{y}.png",
+        description: "国土地理院┃地面の傾斜を白黒で表現。ビルやアスファルトの下に隠れた『旧堤防』や『堀の跡』の段差が線となって見えてきます。",
+        defaultOpacity: 0.4,
+        zIndex: 35,
+        addedAt: "2026-03-08"
+    },
+    {
         id: "chisui_bunruizu",
+        tab: "map",
         name: "平安〜戦国マップ (吉備の穴海)",
         year: "∞",
         url: "https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png",
@@ -42,6 +94,7 @@ export const overlays = [
     },
     {
         id: "1660_ikeda",
+        tab: "map",
         name: "岡山城周辺地図(池田家岡山古図)",
         year: 1660,
         url: "https://mapwarper.h-gis.jp/maps/tile/5139/{z}/{x}/{y}.png",
@@ -52,6 +105,7 @@ export const overlays = [
     },
     {
         id: "1880_meiji",
+        tab: "map",
         name: "明治期の海岸線",
         year: 1880,
         url: "https://cyberjapandata.gsi.go.jp/xyz/swale/{z}/{x}/{y}.png",
@@ -75,6 +129,7 @@ export const overlays = [
     // },
     {
         id: "1897_meiji",
+        tab: "map",
         name: "明治30年の地図",
         year: 1897,
         urls: [
@@ -126,6 +181,7 @@ export const overlays = [
     // },
     {
         id: "1945_aerial_v2",
+        tab: "map",
         name: "航空写真 (1945-50)",
         year: 1945,
         url: "https://cyberjapandata.gsi.go.jp/xyz/ort_USA10/{z}/{x}/{y}.png", 
@@ -138,6 +194,7 @@ export const overlays = [
     },
     {
         id: "1961_aerial",
+        tab: "map",
         name: "航空写真 (1961-69)",
         year: 1961,
         url: "https://cyberjapandata.gsi.go.jp/xyz/ort_old10/{z}/{x}/{y}.png",
@@ -149,6 +206,7 @@ export const overlays = [
     },
     {
         id: "1974_picture",
+        tab: "map",
         name: "航空写真 (1974-78)",
         year: 1974,
         url: "https://cyberjapandata.gsi.go.jp/xyz/gazo1/{z}/{x}/{y}.jpg",
