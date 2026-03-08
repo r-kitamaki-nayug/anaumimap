@@ -1,10 +1,12 @@
-import { overlays, overlayTabs } from './config.js?v=1.1.6';
-import { OkayamaMapView } from './map-view.js?v=1.1.6';
+import { overlays, overlayTabs } from './config.js?v=1.3.0';
+import { notices } from './notices.js?v=1.3.0';
+import { OkayamaMapView } from './map-view.js?v=1.3.0';
 
 const NEW_BADGE_WINDOW_DAYS = 7;
 const HEADER_AUTO_COLLAPSE_MS = 5000;
 const NEW_LAYER_NOTICE_MS = 5000;
 const WELCOME_POPUP_STORAGE_KEY = 'okayama-map-welcome-seen-v1';
+const HEADER_NOTICES_STORAGE_KEY = 'okayama-map-header-notices-read-v1';
 
 class OkayamaMapApp {
     constructor() {
@@ -14,7 +16,10 @@ class OkayamaMapApp {
         this.welcomePopup = null;
         this.appHeader = document.getElementById('app-header');
         this.appHeaderToggle = document.getElementById('app-header-toggle');
+        this.appHeaderNoticeBadge = document.getElementById('app-header-notice-badge');
+        this.appHeaderAnnouncements = document.getElementById('app-header-announcements');
         this.appHeaderCollapseTimer = null;
+        this.headerContentMode = 'default';
         this.newLayerNotice = null;
         this.newLayerNoticeTimer = null;
         this.layerPanel = document.getElementById('layer-panel');
@@ -41,6 +46,8 @@ class OkayamaMapApp {
         this.createWelcomePopup();
         this.createInfoPopup();
         this.createNewLayerNotice();
+        this.renderHeaderAnnouncements();
+        this.updateHeaderNoticeStatus();
         this.setupHeader();
         this.renderLayerTabs();
         this.renderLayerList();
@@ -273,13 +280,18 @@ class OkayamaMapApp {
 
         this.appHeaderToggle.onclick = () => {
             const isCollapsed = this.appHeader.classList.contains('collapsed');
-            this.setHeaderCollapsed(!isCollapsed);
+            if (isCollapsed) {
+                this.openHeaderFromUser();
+            } else {
+                this.setHeaderCollapsed(true);
+            }
         };
 
+        this.setHeaderContentMode('default');
         this.scheduleHeaderAutoCollapse();
     }
 
-    setHeaderCollapsed(collapsed) {
+    setHeaderCollapsed(collapsed, { autoCollapse = true } = {}) {
         if (!this.appHeader || !this.appHeaderToggle) {
             return;
         }
@@ -289,9 +301,23 @@ class OkayamaMapApp {
 
         if (collapsed) {
             this.clearHeaderAutoCollapse();
-        } else {
+        } else if (autoCollapse) {
             this.scheduleHeaderAutoCollapse();
+        } else {
+            this.clearHeaderAutoCollapse();
         }
+    }
+
+    openHeaderFromUser() {
+        const hasNotices = this.hasHeaderNotices();
+        this.setHeaderContentMode(hasNotices ? 'notices' : 'default');
+
+        if (hasNotices) {
+            this.markHeaderNoticesRead();
+            this.updateHeaderNoticeStatus();
+        }
+
+        this.setHeaderCollapsed(false, { autoCollapse: false });
     }
 
     scheduleHeaderAutoCollapse() {
@@ -306,6 +332,108 @@ class OkayamaMapApp {
             window.clearTimeout(this.appHeaderCollapseTimer);
             this.appHeaderCollapseTimer = null;
         }
+    }
+
+    renderHeaderAnnouncements() {
+        if (!this.appHeaderAnnouncements) {
+            return;
+        }
+
+        this.appHeaderAnnouncements.innerHTML = '';
+
+        const inner = document.createElement('div');
+        inner.className = 'app-header-announcements-inner';
+
+        const heading = document.createElement('span');
+        heading.className = 'app-header-announcements-heading';
+        heading.textContent = '更新ログ';
+        inner.appendChild(heading);
+
+        notices.forEach((notice) => {
+            const item = document.createElement('p');
+            item.className = 'app-header-announcement-item';
+            item.textContent = notice.text;
+            inner.appendChild(item);
+        });
+
+        this.appHeaderAnnouncements.appendChild(inner);
+    }
+
+    setHeaderContentMode(mode) {
+        this.headerContentMode = mode;
+
+        if (!this.appHeader) {
+            return;
+        }
+
+        this.appHeader.dataset.mode = mode;
+
+        if (this.appHeaderAnnouncements) {
+            const shouldShowAnnouncements = mode === 'notices' && this.hasHeaderNotices();
+            this.appHeaderAnnouncements.setAttribute('aria-hidden', String(!shouldShowAnnouncements));
+        }
+    }
+
+    hasHeaderNotices() {
+        return notices.length > 0;
+    }
+
+    loadHeaderReadNoticeMap() {
+        try {
+            const raw = window.localStorage.getItem(HEADER_NOTICES_STORAGE_KEY);
+            if (!raw) {
+                return {};
+            }
+
+            const parsed = JSON.parse(raw);
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch {
+            return {};
+        }
+    }
+
+    saveHeaderReadNoticeMap(readMap) {
+        try {
+            window.localStorage.setItem(HEADER_NOTICES_STORAGE_KEY, JSON.stringify(readMap));
+        } catch {
+            // Ignore storage write failures and keep the badge for this session.
+        }
+    }
+
+    getUnreadHeaderNotices() {
+        const readMap = this.loadHeaderReadNoticeMap();
+        return notices.filter((notice) => readMap[notice.id] !== true);
+    }
+
+    markHeaderNoticesRead() {
+        if (!this.hasHeaderNotices()) {
+            return;
+        }
+
+        const readMap = this.loadHeaderReadNoticeMap();
+        let changed = false;
+
+        notices.forEach((notice) => {
+            if (readMap[notice.id] !== true) {
+                readMap[notice.id] = true;
+                changed = true;
+            }
+        });
+
+        if (changed) {
+            this.saveHeaderReadNoticeMap(readMap);
+        }
+    }
+
+    updateHeaderNoticeStatus() {
+        if (!this.appHeader || !this.appHeaderNoticeBadge) {
+            return;
+        }
+
+        const hasUnread = this.getUnreadHeaderNotices().length > 0;
+        this.appHeader.dataset.hasUnread = String(hasUnread);
+        this.appHeaderNoticeBadge.classList.toggle('hidden', !hasUnread);
+        this.appHeaderNoticeBadge.setAttribute('aria-hidden', String(!hasUnread));
     }
 
     showNewLayerNoticeIfNeeded() {
@@ -473,8 +601,14 @@ class OkayamaMapApp {
         this.mapView.setBaseMapOpacity(val);
     }
 
+    cycleBaseMap() {
+        this.mapView.cycleBaseMap();
+        this.updateLayerPanelSummary();
+    }
+
     updateLayerPanelSummary() {
         const activeEntries = this.mapView.getActiveEntriesInOrder(overlays);
+        const currentBaseMap = this.mapView.getCurrentBaseMap();
 
         this.layerPanelSummary.innerHTML = '';
 
@@ -482,7 +616,14 @@ class OkayamaMapApp {
         baseMapItem.className = 'layer-panel-summary-item layer-panel-summary-item-base';
         baseMapItem.innerHTML = `
             <span class="layer-panel-summary-year">現代</span>
-            <span class="layer-panel-summary-name">地理院地図</span>
+            <button
+                type="button"
+                class="layer-panel-summary-name layer-panel-summary-name-button"
+                aria-label="基本地図を切り替え"
+            >
+                <span class="layer-panel-summary-name-text">${currentBaseMap.name}</span>
+                <span class="layer-panel-summary-switch-icon" aria-hidden="true">⇄</span>
+            </button>
             <input
                 type="range"
                 class="layer-panel-summary-slider"
@@ -493,6 +634,7 @@ class OkayamaMapApp {
                 aria-label="基本地図の透過度"
             >
         `;
+        baseMapItem.querySelector('.layer-panel-summary-name-button').onclick = () => this.cycleBaseMap();
         baseMapItem.querySelector('.layer-panel-summary-slider').oninput = (e) => this.setBaseMapOpacity(e.target.value);
         this.layerPanelSummary.appendChild(baseMapItem);
 

@@ -1,9 +1,10 @@
-import { baseMap } from './config.js?v=1.1.6';
+import { baseMap, baseMaps } from './config.js?v=1.3.0';
 
 export class OkayamaMapView {
     constructor({ onMapClick } = {}) {
         this.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([34.6664, 133.9186], 13);
         this.baseMapOpacity = baseMap.defaultOpacity ?? 1;
+        this.currentBaseMap = baseMap;
         this.baseMapLayer = L.tileLayer(baseMap.url, {
             attribution: baseMap.attribution,
             opacity: this.baseMapOpacity
@@ -93,6 +94,32 @@ export class OkayamaMapView {
         const opacity = Number(val);
         this.baseMapOpacity = opacity;
         this.baseMapLayer.setOpacity(opacity);
+    }
+
+    cycleBaseMap() {
+        const currentIndex = baseMaps.findIndex((item) => item.id === this.currentBaseMap.id);
+        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % baseMaps.length : 0;
+        this.setBaseMap(baseMaps[nextIndex]);
+    }
+
+    setBaseMap(data) {
+        if (!data || data.id === this.currentBaseMap.id) {
+            return;
+        }
+
+        if (this.baseMapLayer) {
+            this.map.removeLayer(this.baseMapLayer);
+        }
+
+        this.currentBaseMap = data;
+        this.baseMapLayer = L.tileLayer(data.url, {
+            attribution: data.attribution,
+            opacity: this.baseMapOpacity
+        }).addTo(this.map);
+    }
+
+    getCurrentBaseMap() {
+        return this.currentBaseMap;
     }
 
     getBaseMapOpacity() {

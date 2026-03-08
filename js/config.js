@@ -1,10 +1,20 @@
 // ベースマップの設定
-export const baseMap = {
-    id: "modern",
-    name: "現代 (地理院地図)",
-    url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
-    attribution: "地理院地図┃現在の日本の標準的な地図です。最新の道路、建物、地形が正確に反映されており、古地図と比較する際の基準（ベースマップ）となります。"
-};
+export const baseMaps = [
+    {
+        id: "modern",
+        name: "ベース地図",
+        url: "https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png",
+        attribution: "地理院地図┃現在の日本の標準的な地図です。最新の道路、建物、地形が正確に反映されており、古地図と比較する際の基準（ベースマップ）となります。"
+    },
+    {
+        id: "blank",
+        name: "ベース地図(白地図)",
+        url: "https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png",
+        attribution: "地理院地図┃地名や記号を省いた白地図です。重ねたレイヤーの輪郭や分布を見やすく確認できます。"
+    }
+];
+
+export const baseMap = baseMaps[0];
 
 // 重ねる古地図のリスト
 // `addedAt: "YYYY-MM-DD"` を付けると、追加から 7 日間 UI に NEW が表示されます。
@@ -134,25 +144,25 @@ export const overlays = [
         year: 1897,
         urls: [
             "https://mapwarper.h-gis.jp/maps/tile/711/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/710/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/712/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/713/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/733/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/734/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/735/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/736/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/756/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/757/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/758/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/759/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/779/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/780/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/781/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/782/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/806/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/807/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/808/{z}/{x}/{y}.png",
-            "https://mapwarper.h-gis.jp/maps/tile/809/{z}/{x}/{y}.png"
+            // "https://mapwarper.h-gis.jp/maps/tile/710/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/712/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/713/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/733/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/734/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/735/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/736/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/756/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/757/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/758/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/759/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/779/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/780/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/781/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/782/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/806/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/807/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/808/{z}/{x}/{y}.png",
+            // "https://mapwarper.h-gis.jp/maps/tile/809/{z}/{x}/{y}.png"
         ],
         attribution: "明治30年〜陸軍参謀本部により測図された地図。現在の30号線沿いまで陸地が拡大している。スタンフォード大学のデータベースに掲載されている。",
         defaultOpacity: 0.5,
