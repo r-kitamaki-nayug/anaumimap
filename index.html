@@ -25,7 +25,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="css/style.css?v=1.0.6" />
+    <link rel="stylesheet" href="css/style.css?v=1.0.7" />
 </head>
 <body>
     <div id="map"></div>
@@ -54,7 +54,13 @@
             </button>
             <div id="layer-panel-summary" aria-live="polite"></div>
             <div id="layer-panel-content" class="hidden">
-                <h3>地図レイヤー</h3>
+                <div class="layer-panel-heading">
+                    <h3>地図レイヤー</h3>
+                    <label class="layer-select-all">
+                        <input id="layer-select-all" type="checkbox" aria-label="すべてのレイヤーをまとめて切り替え">
+                        <span>ALL</span>
+                    </label>
+                </div>
                 <div id="layer-list">
                 </div>
             </div>
@@ -62,6 +68,6 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script type="module" src="js/map-engine.js?v=1.0.7"></script>
+    <script type="module" src="js/map-engine.js?v=1.0.8"></script>
 </body>
 </html>

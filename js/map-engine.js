@@ -19,6 +19,8 @@ class OkayamaMapApp {
         this.layerPanelToggle = document.getElementById('layer-panel-toggle');
         this.layerPanelContent = document.getElementById('layer-panel-content');
         this.layerPanelSummary = document.getElementById('layer-panel-summary');
+        this.layerSelectAllToggle = document.getElementById('layer-select-all');
+        this.layerSelectAllHadAnyChecked = false;
         this.panelTouchStartY = null;
         this.panelTouchStartX = null;
         this.panelTouchMoved = false;
@@ -54,18 +56,34 @@ class OkayamaMapApp {
             item.innerHTML = `
                 <div class="layer-header">
                     <label class="layer-toggle-label"><input type="checkbox" class="toggle" data-id="${data.id}"></label>
-                    <button type="button" class="layer-name-button" data-id="${data.id}">
-                        <span class="layer-year">${data.year ?? ''}</span>
-                        <span class="layer-name">${data.name}${this.getNewBadgeMarkup(data)}</span>
-                    </button>
+                    <div class="layer-title-row">
+                        <div class="layer-name-button">
+                            <span class="layer-year">${data.year ?? ''}</span>
+                            <span class="layer-name">${data.name}${this.getNewBadgeMarkup(data)}</span>
+                        </div>
+                        <button type="button" class="layer-info-button" aria-label="${data.name} の説明を表示">i</button>
+                    </div>
                 </div>
             `;
             listContainer.appendChild(item);
 
             // イベント紐付け
-            item.querySelector('.toggle').onchange = (e) => this.toggleLayer(e.target.checked, data);
-            item.querySelector('.layer-name-button').onclick = () => this.openInfoPopup(data);
+            const toggle = item.querySelector('.toggle');
+            const infoButton = item.querySelector('.layer-info-button');
+
+            toggle.onchange = (e) => this.toggleLayer(e.target.checked, data);
+            toggle.onclick = (e) => e.stopPropagation();
+            infoButton.onclick = (e) => {
+                e.stopPropagation();
+                this.openInfoPopup(data);
+            };
+            item.onclick = () => {
+                toggle.checked = !toggle.checked;
+                this.toggleLayer(toggle.checked, data);
+            };
         });
+
+        this.syncLayerSelectAllToggle();
     }
 
     createInfoPopup() {
@@ -209,6 +227,17 @@ class OkayamaMapApp {
         this.layerPanelToggle.addEventListener('touchmove', (e) => this.handlePanelTouchMove(e), { passive: false });
         this.layerPanelToggle.addEventListener('touchend', () => this.handlePanelTouchEnd());
         this.layerPanelToggle.addEventListener('touchcancel', () => this.resetPanelTouchState());
+
+        if (this.layerSelectAllToggle) {
+            this.layerSelectAllToggle.addEventListener('pointerdown', () => {
+                this.layerSelectAllHadAnyChecked = Array.from(document.querySelectorAll('.toggle'))
+                    .some((toggle) => toggle.checked);
+            });
+
+            this.layerSelectAllToggle.onchange = () => {
+                this.toggleAllLayers();
+            };
+        }
     }
 
     toggleLayerPanel() {
@@ -237,6 +266,37 @@ class OkayamaMapApp {
     toggleLayer(isVisible, data) {
         this.mapView.setOverlayVisibility(data, isVisible);
         this.updateLayerPanelSummary();
+        this.syncLayerSelectAllToggle();
+    }
+
+    setAllLayersVisible(isVisible) {
+        overlays.forEach((data) => {
+            const toggle = document.querySelector(`.toggle[data-id="${data.id}"]`);
+            if (toggle) {
+                toggle.checked = isVisible;
+            }
+
+            this.mapView.setOverlayVisibility(data, isVisible);
+        });
+
+        this.updateLayerPanelSummary();
+        this.syncLayerSelectAllToggle();
+    }
+
+    toggleAllLayers() {
+        this.setAllLayersVisible(!this.layerSelectAllHadAnyChecked);
+    }
+
+    syncLayerSelectAllToggle() {
+        if (!this.layerSelectAllToggle) {
+            return;
+        }
+
+        const toggles = Array.from(document.querySelectorAll('.toggle'));
+        const checkedCount = toggles.filter((toggle) => toggle.checked).length;
+
+        this.layerSelectAllToggle.checked = checkedCount > 0 && checkedCount === toggles.length;
+        this.layerSelectAllToggle.indeterminate = checkedCount > 0 && checkedCount < toggles.length;
     }
 
     setOpacity(id, val) {
