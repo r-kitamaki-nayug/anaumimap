@@ -20,6 +20,10 @@ export class OkayamaMapView {
 
     setOverlayVisibility(data, isVisible) {
         if (isVisible) {
+            if (this.activeLayers[data.id]) {
+                this.map.removeLayer(this.activeLayers[data.id].layer);
+            }
+
             const layer = L.tileLayer(data.url, this.buildOverlayOptions(data)).addTo(this.map);
             this.activeLayers[data.id] = {
                 layer,

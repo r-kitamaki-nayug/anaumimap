@@ -22,6 +22,7 @@ class OkayamaMapApp {
         this.layerPanelContent = document.getElementById('layer-panel-content');
         this.layerPanelSummary = document.getElementById('layer-panel-summary');
         this.layerSelectAllToggle = document.getElementById('layer-select-all');
+        this.layerSelectAllControl = document.querySelector('.layer-select-all');
         this.layerSelectAllHadAnyChecked = false;
         this.panelTouchStartY = null;
         this.panelTouchStartX = null;
@@ -294,11 +295,14 @@ class OkayamaMapApp {
         this.layerPanelToggle.addEventListener('touchend', () => this.handlePanelTouchEnd());
         this.layerPanelToggle.addEventListener('touchcancel', () => this.resetPanelTouchState());
 
-        if (this.layerSelectAllToggle) {
-            this.layerSelectAllToggle.addEventListener('pointerdown', () => {
+        if (this.layerSelectAllControl && this.layerSelectAllToggle) {
+            const rememberLayerSelectionState = () => {
                 this.layerSelectAllHadAnyChecked = Array.from(document.querySelectorAll('.toggle'))
                     .some((toggle) => toggle.checked);
-            });
+            };
+
+            this.layerSelectAllControl.addEventListener('pointerdown', rememberLayerSelectionState);
+            this.layerSelectAllControl.addEventListener('touchstart', rememberLayerSelectionState, { passive: true });
 
             this.layerSelectAllToggle.onchange = () => {
                 this.toggleAllLayers();
