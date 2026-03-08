@@ -756,9 +756,14 @@ class OkayamaMapApp {
     }
 
     handleMapClick() {
-        const isOpen = !this.layerPanel.classList.contains('collapsed');
-        if (isOpen) {
+        const isLayerPanelOpen = !this.layerPanel.classList.contains('collapsed');
+        if (isLayerPanelOpen) {
             this.closeLayerPanel();
+        }
+
+        const isHeaderOpen = this.appHeader && !this.appHeader.classList.contains('collapsed');
+        if (isHeaderOpen) {
+            this.setHeaderCollapsed(true);
         }
     }
 }
