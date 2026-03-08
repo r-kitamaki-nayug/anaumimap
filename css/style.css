@@ -529,6 +529,88 @@ h3 { font-size: 12px; border-bottom: none; padding-bottom: 5px; color: var(--the
     transition: none;
 }
 
+.welcome-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 2100;
+}
+
+.welcome-popup-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.42);
+}
+
+.welcome-popup-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(92vw, 640px);
+    max-height: 82vh;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.welcome-popup-content {
+    padding: 22px 20px calc(40px + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    color: var(--theme-text-main);
+    line-height: 1.7;
+}
+
+.welcome-popup-title {
+    margin: 0 32px 14px 0;
+    font-size: 22px;
+    line-height: 1.35;
+    color: var(--theme-text-main);
+}
+
+.welcome-popup-heading {
+    margin: 18px 0 8px;
+    font-size: 16px;
+    line-height: 1.4;
+    color: var(--theme-text-main);
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.welcome-popup-content p {
+    margin: 0 0 12px;
+    font-size: 14px;
+}
+
+.welcome-popup-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: none;
+    background: none;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    color: rgba(79, 79, 79, 0.88);
+}
+
+.welcome-popup-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8px;
+    width: 100%;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 999px;
+    background: var(--theme-primary);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
 .info-popup {
     position: fixed;
     inset: 0;

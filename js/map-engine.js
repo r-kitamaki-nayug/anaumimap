@@ -4,12 +4,14 @@ import { OkayamaMapView } from './map-view.js?v=1.0.9';
 const NEW_BADGE_WINDOW_DAYS = 7;
 const HEADER_AUTO_COLLAPSE_MS = 5000;
 const NEW_LAYER_NOTICE_MS = 5000;
+const WELCOME_POPUP_STORAGE_KEY = 'okayama-map-welcome-seen-v1';
 
 class OkayamaMapApp {
     constructor() {
         this.infoPopup = null;
         this.infoPopupTitle = null;
         this.infoPopupBody = null;
+        this.welcomePopup = null;
         this.appHeader = document.getElementById('app-header');
         this.appHeaderToggle = document.getElementById('app-header-toggle');
         this.appHeaderCollapseTimer = null;
@@ -32,6 +34,7 @@ class OkayamaMapApp {
         });
 
         // 2. UIの生成
+        this.createWelcomePopup();
         this.createInfoPopup();
         this.createNewLayerNotice();
         this.setupHeader();
@@ -39,6 +42,7 @@ class OkayamaMapApp {
         this.setupLayerPanel();
         this.updateLayerPanelSummary();
         this.updateControlsOffset();
+        this.showWelcomePopupIfNeeded();
         this.showNewLayerNoticeIfNeeded();
         
         // 3. GPSボタン設定
@@ -86,6 +90,38 @@ class OkayamaMapApp {
         this.syncLayerSelectAllToggle();
     }
 
+    createWelcomePopup() {
+        const popup = document.createElement('div');
+        popup.className = 'welcome-popup hidden';
+        popup.innerHTML = `
+            <div class="welcome-popup-backdrop"></div>
+            <div class="welcome-popup-dialog" role="dialog" aria-modal="true" aria-labelledby="welcome-popup-title">
+                <button type="button" class="welcome-popup-close" aria-label="閉じる">×</button>
+                <div class="welcome-popup-content">
+                    <h2 id="welcome-popup-title" class="welcome-popup-title">🗺️ 岡山の歴史を重ねて見るMAPへようこそ！</h2>
+                    <p>今、あなたが立っているその場所、大昔は海だったかもしれません。</p>
+                    <p>このアプリは、「かつての海岸線がどこにあったのか、どう街に変わったのかを視覚的に体験したい」という好奇心から生まれました。</p>
+                    <h3 class="welcome-popup-heading">🌊 岡山駅は、かつて海だった</h3>
+                    <p>今の岡山駅周辺や市街地の下には、かつての「吉備の穴海（きびのあなうみ）」が眠っています。数百年にわたる自然な土砂の堆積、大規模な干拓（かんたく）によって、岡山はダイナミックにその形を変えてきました。</p>
+                    <h3 class="welcome-popup-heading">🕒 このアプリでできること</h3>
+                    <p><strong>透かして見る:</strong> 各時代の情報の「透過度」を調整して、今の道路や線路が、昔の堤防や川の跡とどう重なるか確認できます。</p>
+                    <p><strong>今いる場所を知る:</strong> GPSボタンを押せば、あなたの足元に広がる数世紀前の風景が浮かび上がります。</p>
+                    <p>さあ、レイヤーを重ねて、足元に眠る歴史の跡を探しに出かけましょう！</p>
+                    <h3 class="welcome-popup-heading">💡 ヒント</h3>
+                    <p>ページ下部の「地図レイヤー」パネルから、重ねたい時代の地図を選んでみてください。特におすすめは「治水地形分類図」です。紫色のエリアを眺めると、かつての海の広さに驚くはずです！</p>
+                    <button type="button" class="welcome-popup-action">はじめる</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(popup);
+        this.welcomePopup = popup;
+
+        popup.querySelector('.welcome-popup-close').onclick = () => this.closeWelcomePopup();
+        popup.querySelector('.welcome-popup-backdrop').onclick = () => this.closeWelcomePopup();
+        popup.querySelector('.welcome-popup-action').onclick = () => this.closeWelcomePopup();
+    }
+
     createInfoPopup() {
         const popup = document.createElement('div');
         popup.className = 'info-popup hidden';
@@ -106,6 +142,22 @@ class OkayamaMapApp {
 
         popup.querySelector('.info-popup-close').onclick = () => this.closeInfoPopup();
         popup.querySelector('.info-popup-backdrop').onclick = () => this.closeInfoPopup();
+    }
+
+    showWelcomePopupIfNeeded() {
+        if (!this.welcomePopup) {
+            return;
+        }
+
+        try {
+            if (window.localStorage.getItem(WELCOME_POPUP_STORAGE_KEY) === 'true') {
+                return;
+            }
+        } catch {
+            // If storage is unavailable, fall back to showing once per page load.
+        }
+
+        this.welcomePopup.classList.remove('hidden');
     }
 
     createNewLayerNotice() {
@@ -194,6 +246,20 @@ class OkayamaMapApp {
         this.newLayerNotice.classList.remove('is-visible');
         this.newLayerNotice.setAttribute('aria-hidden', 'true');
         this.clearNewLayerNoticeTimer();
+    }
+
+    closeWelcomePopup() {
+        if (!this.welcomePopup) {
+            return;
+        }
+
+        this.welcomePopup.classList.add('hidden');
+
+        try {
+            window.localStorage.setItem(WELCOME_POPUP_STORAGE_KEY, 'true');
+        } catch {
+            // Ignore storage write failures and simply close the popup for this session.
+        }
     }
 
     clearNewLayerNoticeTimer() {

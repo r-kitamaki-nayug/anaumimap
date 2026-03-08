@@ -11,7 +11,7 @@ export const baseMap = {
 export const overlays = [
     {
         id: "chisui_bunruizu",
-        name: "戦国〜平安推定マップ (吉備の穴海)",
+        name: "平安〜戦国マップ (吉備の穴海)",
         year: "∞",
         url: "https://cyberjapandata.gsi.go.jp/xyz/lcm25k_2012/{z}/{x}/{y}.png",
         description: "国土地理院 (治水地形分類図)。江戸時代以前の岡山を推測するモード。紫色のエリアをすべて『海』、水色の筋を『川』と見なすと、児島が島だった頃の『吉備の穴海』の姿が見えてきます。",
