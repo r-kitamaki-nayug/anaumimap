@@ -31,6 +31,7 @@ class OkayamaMapApp {
         this.layerSelectAllToggle = document.getElementById('layer-select-all');
         this.layerSelectAllControl = document.querySelector('.layer-select-all');
         this.layerSelectAllHadAnyChecked = false;
+        this.layerPanelResizeObserver = null;
         this.panelTouchStartY = null;
         this.panelTouchStartX = null;
         this.panelTouchMoved = false;
@@ -52,6 +53,7 @@ class OkayamaMapApp {
         this.renderLayerTabs();
         this.renderLayerList();
         this.setupLayerPanel();
+        this.observeLayerPanelSize();
         this.updateLayerPanelSummary();
         this.updateControlsOffset();
         this.showWelcomePopupIfNeeded();
@@ -500,6 +502,8 @@ class OkayamaMapApp {
     }
 
     setupLayerPanel() {
+        this.setLayerPanelExpanded(!this.layerPanel.classList.contains('collapsed'));
+
         this.layerPanelToggle.onclick = () => {
             if (this.ignoreNextToggleClick) {
                 this.ignoreNextToggleClick = false;
@@ -528,6 +532,17 @@ class OkayamaMapApp {
         }
     }
 
+    observeLayerPanelSize() {
+        if (!this.layerPanel || typeof ResizeObserver === 'undefined') {
+            return;
+        }
+
+        this.layerPanelResizeObserver = new ResizeObserver(() => {
+            this.updateControlsOffset();
+        });
+        this.layerPanelResizeObserver.observe(this.layerPanel);
+    }
+
     toggleLayerPanel() {
         const isOpen = !this.layerPanel.classList.contains('collapsed');
         if (isOpen) {
@@ -538,16 +553,27 @@ class OkayamaMapApp {
     }
 
     openLayerPanel() {
-        this.layerPanel.classList.remove('collapsed');
-        this.layerPanelContent.classList.remove('hidden');
-        this.layerPanelToggle.setAttribute('aria-expanded', 'true');
-        this.updateControlsOffset();
+        this.setLayerPanelExpanded(true);
     }
 
     closeLayerPanel() {
-        this.layerPanel.classList.add('collapsed');
-        this.layerPanelContent.classList.add('hidden');
-        this.layerPanelToggle.setAttribute('aria-expanded', 'false');
+        this.setLayerPanelExpanded(false);
+    }
+
+    setLayerPanelExpanded(isExpanded) {
+        if (!this.layerPanel || !this.layerPanelContent || !this.layerPanelToggle) {
+            return;
+        }
+
+        this.layerPanel.classList.toggle('collapsed', !isExpanded);
+        this.layerPanelContent.classList.toggle('hidden', !isExpanded);
+        this.layerPanelToggle.setAttribute('aria-expanded', String(isExpanded));
+        this.layerPanelContent.setAttribute('aria-hidden', String(!isExpanded));
+
+        if ('inert' in this.layerPanelContent) {
+            this.layerPanelContent.inert = !isExpanded;
+        }
+
         this.updateControlsOffset();
     }
 
